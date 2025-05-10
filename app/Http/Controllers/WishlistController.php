@@ -76,5 +76,34 @@ class WishlistController extends Controller
             return response()->json(['message' => 'Failed to add product to wishlist'], 500);
         }
     }
-  
+
+     // Remove a product from the wishlist
+    public function removeWishlistItem(Request $request)
+    {
+        try {
+            // Validate incoming data
+            $request->validate([
+                'customer_id' => 'required|exists:customers,id',
+                'product_id' => 'required|exists:products,id',
+            ]);
+
+            $customerId = $request->input('customer_id');
+            $productId = $request->input('product_id');
+
+            // Find the wishlist item to delete
+            $wishlistItem = Wishlist::where('customer_id', $customerId)
+                ->where('product_id', $productId)
+                ->first();
+    if ($wishlistItem) {
+        $wishlistItem->delete();
+        return response()->json(['message' => 'wishlist item deleted successfully']);
+    }
+
+    return response()->json(['error' => 'wishlist item not found'], 404);
+} catch (\Exception $e) {
+    Log::error('Error deleting wishlist item: ' . $e->getMessage());
+    return response()->json(['message' => 'Failed to delete wishlist item'], 500);
+}
+}
+
 }

@@ -153,4 +153,70 @@ class ProductController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Product updated successfully', 'product' => $product]);
     }
+
+    public function searchProducts(Request $request)
+{
+    try {
+        // Extract query parameters
+        $query = $request->input('query'); // Search term
+        $category = $request->input('category'); // Filter by category
+        $minPrice = $request->input('min_price'); // Minimum price
+        $maxPrice = $request->input('max_price'); // Maximum price
+
+        // Start building the query
+        $products = Product::query();
+
+        // Apply search query (name or description)
+        if ($query) {
+            $products->where(function ($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%")
+                  ->orWhere('description', 'like', "%{$query}%")
+                  ->orWhere('category', 'like', "%{$query}%");;
+            });
+        }
+
+        // Apply category filter
+        if ($category) {
+            $products->where('category', $category);
+        }
+
+        // Apply price range filter
+        if ($minPrice !== null && $maxPrice !== null) {
+            $products->whereBetween('price', [(float) $minPrice, (float) $maxPrice]);
+        } elseif ($minPrice !== null) {
+            $products->where('price', '>=', (float) $minPrice);
+        } elseif ($maxPrice !== null) {
+            $products->where('price', '<=', (float) $maxPrice);
+        }
+
+        // Fetch results
+        $results = $products->get();
+
+        return response()->json(['success' => true, 'products' => $results], 200);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => 'Failed to fetch products: ' . $e->getMessage()], 500);
+    }
+}
+public function getUniqueCategories()
+{
+    try {
+        // Fetch unique categories from the products table
+        $categories = Product::distinct()->pluck('category')->filter()->values();
+
+        return response()->json(['success' => true, 'categories' => $categories], 200);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => 'Failed to fetch categories: ' . $e->getMessage()], 500);
+    }
+}
+public function getSuggestedProducts()
+{
+    try {
+        // Fetch 4 random products (or use any other logic for suggestions)
+        $suggestedProducts = Product::inRandomOrder()->limit(4)->get();
+
+        return response()->json(['success' => true, 'products' => $suggestedProducts], 200);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => 'Failed to fetch suggested products: ' . $e->getMessage()], 500);
+    }
+}
 }

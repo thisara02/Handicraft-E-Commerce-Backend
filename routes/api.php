@@ -13,6 +13,16 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\VendorForgotPasswordController;
+
+Route::post('/vforgot-password', [VendorForgotPasswordController::class, 'sendOtp']);
+Route::post('/vverify-otp', [VendorForgotPasswordController::class, 'verifyOtp']);
+Route::post('/vreset-password', [VendorForgotPasswordController::class, 'resetPassword']);
+
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendOtp']);
+Route::post('/fverify-otp', [ForgotPasswordController::class, 'verifyOtp']);
+Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
 Route::get('/admin/orders/total-count', [OrderController::class, 'getTotalOrderCount']);
 Route::get('/admin/orders', [OrderController::class, 'getAllOrders']);
@@ -20,10 +30,16 @@ Route::post('/vendor/orders/update-status', [OrderController::class, 'updateOrde
 Route::post('/orders', [OrderController::class, 'store']);
 Route::get('/vendor/orders', [OrderController::class, 'getVendorOrders']);
 
+Route::delete('/vendor/delete-product/{id}', [VendorController::class, 'deleteProduct']);
+
+Route::get('/products/suggested', [ProductController::class, 'getSuggestedProducts']);
+Route::get('/products/categories', [ProductController::class, 'getUniqueCategories']);
+Route::get('/products/search', [ProductController::class, 'searchProducts']);
 Route::post('/payhere/callback', [OrderController::class, 'handlePayHereCallback']);
 Route::get('/products/{productId}/reviews', [ReviewController::class, 'getReviewsByProduct']);
 Route::post('/wishlist/getItems', [WishlistController::class, 'getWishlistItems']);
 Route::post('/wishlist/add', [WishlistController::class, 'addToWishlist']);
+Route::post('/wishlist/remove', [WishlistController::class, 'removeWishlistItem']);
 // Remove a product from the cart
 Route::get('/products/{productId}/reviews', [ReviewController::class, 'getReviews']);
 Route::post('/reviews/add', [ReviewController::class, 'addReview']);

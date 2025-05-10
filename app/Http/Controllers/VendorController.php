@@ -13,9 +13,32 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Models\Product;
 
 class VendorController extends Controller
 {
+
+    public function deleteProduct($id)
+{
+    try {
+        // Find the product by ID
+        $product = Product::findOrFail($id);
+
+        // Validate that the product belongs to the logged-in vendor
+        $vendorId = request()->input('vendor_id');
+        if ($product->vendor_id !== $vendorId) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized access'], 403);
+        }
+
+        // Delete the product
+        $product->delete();
+
+        return response()->json(['success' => true, 'message' => 'Product deleted successfully']);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => 'Failed to delete product: ' . $e->getMessage()], 500);
+    }
+}
+
  // Get total approved vendor count
  public function getApprovedVendorsCount()
  {
@@ -233,4 +256,5 @@ class VendorController extends Controller
             ], 500);
         }
     }
+    
 }
